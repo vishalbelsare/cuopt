@@ -79,6 +79,11 @@ files:
     includes:
         - cuda
         - cuda_version
+        - depends_on_libcuopt
+        - depends_on_cuopt
+        - depends_on_cuopt_server
+        - depends_on_cuopt_sh_client
+        - depends_on_mps_parser
         - docs
         - py_version
   py_build_cuopt_mps_parser:
@@ -249,8 +254,6 @@ channels:
   - rapidsai
   - rapidsai-nightly
   - conda-forge
-  - nvidia
-  - nvidia/label/cuda-12.4.0
 dependencies:
   rapids_build_backend:
     common:
@@ -358,10 +361,10 @@ dependencies:
     common:
       - output_types: [conda, requirements, pyproject]
         packages:
-          - numba-cuda>=0.11.0,<0.12.0a0
-          - numba>=0.59.1,<0.62.0a0
+          - numba-cuda>=0.14.0
+          - numba>=0.59.1
           - rapids-dask-dependency==25.8.*,>=0.0.0a0
-          - &pandas pandas>=2.0,<2.2.3dev0
+          - &pandas pandas>=2.0
       - output_types: requirements
         packages:
           # pip recognizes the index as a global option for the requirements.txt file
@@ -466,6 +469,35 @@ dependencies:
             packages:
               - cuopt-cu12==25.8.*,>=0.0.0a0
           - {matrix: null, packages: [*cuopt_unsuffixed]}
+  depends_on_cuopt_server:
+    common:
+      - output_types: conda
+        packages:
+          - &cuopt_server_unsuffixed cuopt-server==25.8.*,>=0.0.0a0
+      - output_types: requirements
+        packages:
+          # pip recognizes the index as a global option for the requirements.txt file
+          - --extra-index-url=https://pypi.nvidia.com
+          - --extra-index-url=https://pypi.anaconda.org/rapidsai-wheels-nightly/simple
+    specific:
+      - output_types: [requirements, pyproject]
+        matrices:
+          - matrix:
+              cuda: "12.*"
+              cuda_suffixed: "true"
+            packages:
+              - cuopt-server-cu12==25.8.*,>=0.0.0a0
+          - {matrix: null, packages: [*cuopt_server_unsuffixed]}
+  depends_on_cuopt_sh_client:
+    common:
+      - output_types: [conda, requirements, pyproject]
+        packages:
+          - &cuopt_sh_client_unsuffixed cuopt-sh-client==25.8.*,>=0.0.0a0
+      - output_types: requirements
+        packages:
+          # pip recognizes the index as a global option for the requirements.txt file
+          - --extra-index-url=https://pypi.nvidia.com
+          - --extra-index-url=https://pypi.anaconda.org/rapidsai-wheels-nightly/simple
   depends_on_mps_parser:
     common:
       - output_types: [requirements, pyproject, conda]
@@ -505,7 +537,6 @@ dependencies:
       - output_types: conda
         packages:
           - cupy>=12.0.0
-
   depends_on_rapids_logger:
     common:
       - output_types: [conda, requirements, pyproject]
